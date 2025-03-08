@@ -1,0 +1,15 @@
+Farm Image Analysis Results
+==========================
+
+Image: image.png
+Farm area detected: x=8, y=85, width=1136, height=397
+Resolution: 1136 x 397 pixels
+
+Plant Health:
+- Overall health: 91.1%
+- Vegetation coverage: 94.3%
+
+Soil Analysis:
+- Average soil color (RGB): [139 123 102]
+- Soil color variation (RGB): [39 35 33]
+- Estimated soil moisture: 52.4%

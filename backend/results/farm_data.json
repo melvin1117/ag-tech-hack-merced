@@ -1,0 +1,52 @@
+{
+  "soil": {
+    "npk": {
+      "nitrogen": {
+        "current": 95,
+        "optimum": 80
+      },
+      "phosphorus": {
+        "current": 52,
+        "optimum": 40
+      },
+      "potassium": {
+        "current": 50,
+        "optimum": 60
+      }
+    },
+    "soilMoisture": 70
+  },
+  "imageInsights": [
+    {
+      "label": "Soil Quality Assessment",
+      "path": "./results/analysis_results.png",
+      "value": 0.91
+    },
+    {
+      "label": "Nutrient Distribution Analysis",
+      "path": "./results/analysis_results.png",
+      "value": 0.52
+    }
+  ],
+  "predictedYield": "Moderate",
+  "carbonFootprint": "Data insufficient for accurate calculation",
+  "suggestions": "The almond trees are currently in their early spring growth stage in Merced, California.  Given the NPK values, soil moisture, and weather conditions, the following is recommended:\n1. Nitrogen Management: While nitrogen levels are slightly above the optimal range for almonds, it's crucial not to over-fertilize during this early spring growth stage. Monitor leaf color and tree vigor for signs of nitrogen deficiency. Consider a foliar nitrogen application if needed, but prioritize soil health and avoid excessive nitrogen, which can lead to increased susceptibility to diseases and pests.\n2. Irrigation: Soil moisture is at 70%, which is generally good for almonds. However, given the clear sky conditions and wind, monitor soil moisture closely to prevent water stress, especially as temperatures increase. Implement a water management plan that considers the current weather conditions and the trees' growth stage. Consider using drip irrigation for efficient water use.\n3. Pest and Disease Management: Early spring is a critical time for pest and disease monitoring. Scout for common almond pests like mites, aphids, and navel orangeworm. Implement preventative measures as needed, considering the current weather conditions and predicted pest pressure.\n4. Weed Control: Implement weed control measures to minimize competition for water and nutrients. Prioritize methods that minimize soil disturbance and promote soil health.",
+  "insights": "The soil analysis indicates generally good conditions for almond production. Nitrogen is slightly high, but phosphorus and potassium levels are within the optimal range. The soil moisture of 70% is adequate for now, but needs careful monitoring due to the clear sky and wind, which can increase evaporation. The 16.32\u00b0C temperature is favorable for almond growth in early spring. The clear sky conditions promote photosynthesis, but also increase the risk of frost damage if temperatures drop significantly overnight. The wind speed of 5.14 m/s can increase water loss from the trees and soil, so close monitoring of soil moisture is essential.",
+  "recommendedCrops": [
+    {
+      "label": "Tomatoes",
+      "value": "Tomatoes are a good rotational crop after almonds as they have different nutrient requirements and can help break pest and disease cycles. They also thrive in the Central Valley climate.",
+      "when": "Late Spring (May-June)"
+    },
+    {
+      "label": "Melons",
+      "value": "Melons, like watermelons or cantaloupes, are another suitable option for rotation after almonds. They prefer well-drained soil and warm temperatures, making them suitable for the Central Valley's summer season.",
+      "when": "Late Spring (May-June)"
+    },
+    {
+      "label": "Cover Crops (e.g., Mustard)",
+      "value": "Planting a cover crop like mustard after almond harvest in the fall can improve soil health, suppress weeds, and fix nitrogen, benefiting the soil for future almond crops or other rotations.",
+      "when": "Fall (October-November)"
+    }
+  ]
+}
