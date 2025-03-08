@@ -11,6 +11,7 @@ import { Vector as VectorSource } from 'ol/source';
 import { Draw } from 'ol/interaction';
 import { fromLonLat, toLonLat } from 'ol/proj';
 import OlGeocoder from 'ol-geocoder';
+import { Style, Stroke, Fill } from 'ol/style';
 import { confirmFarmArea } from '../../services/api';
 import { useAuth0 } from '@auth0/auth0-react';
 
@@ -20,28 +21,36 @@ const MapSetup = () => {
   const mapObject = useRef<Map | null>(null);
   const [currentFeature, setCurrentFeature] = useState<any>(null);
 
-  // Create a vector source and layer for drawn features
+  // Create a vector source and layer for drawn features with custom style
   const vectorSource = useRef(new VectorSource());
   const vectorLayer = useRef(
     new VectorLayer({
       source: vectorSource.current,
+      style: new Style({
+        stroke: new Stroke({
+          color: 'red',
+          width: 4, // thicker line
+        }),
+        fill: new Fill({
+          color: 'rgba(0,0,0,0)', // transparent fill
+        }),
+      }),
     })
   );
+
   // Reference for the Draw interaction
   const drawInteraction = useRef<Draw | null>(null);
 
   useEffect(() => {
-    // Only initialize the map if it hasn't been created yet
     if (!mapRef.current || mapObject.current) return;
 
-    // Initialize the map with a satellite base layer (with crossOrigin enabled)
     mapObject.current = new Map({
       target: mapRef.current,
       layers: [
         new TileLayer({
           source: new XYZ({
             url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-            crossOrigin: 'anonymous', // allow cross-origin requests
+            crossOrigin: 'anonymous',
             attributions: 'Tiles © Esri',
           }),
         }),
@@ -53,7 +62,6 @@ const MapSetup = () => {
       }),
     });
 
-    // Center on the user's current location if available
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -68,13 +76,11 @@ const MapSetup = () => {
       );
     }
 
-    // Add drawing interaction for polygon drawing
     drawInteraction.current = new Draw({
       type: 'Polygon',
     });
     mapObject.current.addInteraction(drawInteraction.current);
 
-    // Listen for the drawend event
     drawInteraction.current.on('drawend', (event) => {
       // Clear any existing features (allowing only one at a time)
       vectorSource.current.clear();
@@ -82,7 +88,6 @@ const MapSetup = () => {
       vectorSource.current.addFeature(feature);
       setCurrentFeature(feature);
 
-      // Convert geometry coordinates to [lon, lat] and log them
       const geometry = feature.getGeometry();
       const coords = geometry.getCoordinates();
       const lonLatCoords = coords.map((ring: any) =>
@@ -91,7 +96,6 @@ const MapSetup = () => {
       console.log('Drawn polygon coordinates (lon, lat):', lonLatCoords);
     });
 
-    // Add a geocoder control (powered by Nominatim/OpenStreetMap)
     const geocoder = new OlGeocoder('nominatim', {
       provider: 'osm',
       lang: 'en-US',
@@ -109,89 +113,106 @@ const MapSetup = () => {
       mapObject.current?.getView().animate({ center: coordinate, zoom: 14 });
     });
 
-    // Cleanup on unmount
     return () => {
       mapObject.current?.setTarget(null);
       mapObject.current = null;
     };
   }, []);
 
-  // Undo: remove the last drawn point using draw.removeLastPoint()
+  // Undo: remove the last drawn point using removeLastPoint()
   const handleUndo = () => {
     if (drawInteraction.current) {
-      // This method removes the last vertex in the drawing
       drawInteraction.current.removeLastPoint();
     }
   };
 
-  // Confirm: capture the map snapshot and polygon coordinates, then call API
+  // Download helper: trigger download of image blob
+  const downloadImage = (blob: Blob) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'map-snapshot.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  // Confirm: zoom to drawn area, capture snapshot, download image, and send API call
   const handleConfirm = async () => {
     if (!currentFeature || !mapObject.current) {
       alert('Please draw an area first.');
       return;
     }
-    // Capture snapshot after render completes
-    mapObject.current.once('rendercomplete', async () => {
-      const mapCanvas = document.createElement('canvas');
-      const size = mapObject.current!.getSize();
-      mapCanvas.width = size[0];
-      mapCanvas.height = size[1];
-      const mapContext = mapCanvas.getContext('2d');
+    // Fit view to the feature's extent with some padding
+    const geometry = currentFeature.getGeometry();
+    const extent = geometry.getExtent();
+    mapObject.current.getView().fit(extent, { padding: [20, 20, 20, 20], duration: 0 });
+    
+    // Wait a tick for the view to update
+    setTimeout(() => {
+      mapObject.current!.once('rendercomplete', async () => {
+        const mapCanvas = document.createElement('canvas');
+        const size = mapObject.current!.getSize();
+        mapCanvas.width = size[0];
+        mapCanvas.height = size[1];
+        const mapContext = mapCanvas.getContext('2d');
 
-      // Merge all layer canvases into one
-      Array.prototype.forEach.call(
-        document.querySelectorAll('.ol-layer canvas'),
-        (canvas: HTMLCanvasElement) => {
-          if (canvas.width > 0) {
-            const opacity = canvas.parentNode?.style.opacity;
-            mapContext!.globalAlpha = opacity === '' ? 1 : Number(opacity);
-            const transform = canvas.style.transform;
-            const matrix = transform
-              .match(/^matrix\(([^\(]*)\)$/)?.[1]
-              .split(',')
-              .map(Number);
-            if (matrix) {
-              // @ts-ignore
-              CanvasRenderingContext2D.prototype.setTransform.apply(
-                mapContext,
-                matrix
-              );
+        Array.prototype.forEach.call(
+          document.querySelectorAll('.ol-layer canvas'),
+          (canvas: HTMLCanvasElement) => {
+            if (canvas.width > 0) {
+              const opacity = canvas.parentNode?.style.opacity;
+              mapContext!.globalAlpha = opacity === '' ? 1 : Number(opacity);
+              const transform = canvas.style.transform;
+              const matrix = transform
+                .match(/^matrix\(([^\(]*)\)$/)?.[1]
+                .split(',')
+                .map(Number);
+              if (matrix) {
+                // @ts-ignore
+                CanvasRenderingContext2D.prototype.setTransform.apply(
+                  mapContext,
+                  matrix
+                );
+              }
+              mapContext!.drawImage(canvas, 0, 0);
             }
-            mapContext!.drawImage(canvas, 0, 0);
           }
-        }
-      );
-      mapCanvas.toBlob(async (blob) => {
-        if (blob) {
-          // Extract coordinates from the drawn feature
-          const geometry = currentFeature.getGeometry();
-          const coords = geometry.getCoordinates();
-          const lonLatCoords = coords.map((ring: any) =>
-            ring.map((coord: any) => toLonLat(coord))
-          );
-          console.log('Confirming area with coords:', lonLatCoords);
-          // Get auth token (and assume user id is in user.sub)
-          const token = await getAccessTokenSilently();
-          const userId = user?.sub || '';
-          // Call API service to confirm farm area
-          try {
-            await confirmFarmArea({
-              userId,
-              token,
-              coords: lonLatCoords,
-              image: blob,
-            });
-            alert('Farm area confirmed successfully!');
-          } catch (error) {
-            console.error('Error confirming farm area:', error);
-            alert('Failed to confirm area.');
+        );
+
+        mapCanvas.toBlob(async (blob) => {
+          if (blob) {
+            // Download the image
+            downloadImage(blob);
+            // Extract coordinates from the drawn feature
+            const coords = geometry.getCoordinates();
+            const lonLatCoords = coords.map((ring: any) =>
+              ring.map((coord: any) => toLonLat(coord))
+            );
+            console.log('Confirming area with coords:', lonLatCoords);
+            // Get auth token and user id
+            const token = await getAccessTokenSilently();
+            const userId = user?.sub || '';
+            try {
+              await confirmFarmArea({
+                userId,
+                token,
+                coords: lonLatCoords,
+                image: blob,
+              });
+              alert('Farm area confirmed successfully!');
+            } catch (error) {
+              console.error('Error confirming farm area:', error);
+              alert('Failed to confirm area.');
+            }
+          } else {
+            console.error('Failed to generate snapshot; canvas may be tainted.');
           }
-        } else {
-          console.error('Failed to generate snapshot; canvas may be tainted.');
-        }
+        });
       });
-    });
-    mapObject.current.renderSync();
+      mapObject.current!.renderSync();
+    }, 100);
   };
 
   return (
