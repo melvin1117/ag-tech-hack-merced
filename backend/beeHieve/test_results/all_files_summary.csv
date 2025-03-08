@@ -1,0 +1,2 @@
+filename,total_duration,total_segments,bee_segments,nobee_segments,bee_percentage,avg_bee_probability,avg_nobee_probability,high_conf_bee,high_conf_nobee,max_sequence_length,max_sequence_label,primary_classification,confidence,processing_time
+Hive3_20_07_2017_QueenBee_H3_audio___06_20_00.wav,591.0,197,31,166,15.736040609137056,0.7932777327875937,0.9160085854922486,10,125,52,nobee,nobee,0.9160085854922486,18.971567153930664
