@@ -1,3 +1,5 @@
+const BE_BASE_URL = process.env.NEXT_PUBLIC_BE_BASE_URL || "http://localhost:8000";
+
 export interface ConfirmFarmAreaParams {
   userId: string;
   token: string;
@@ -8,32 +10,31 @@ export interface ConfirmFarmAreaParams {
 export async function confirmFarmArea(params: ConfirmFarmAreaParams): Promise<any> {
   const { userId, token, coords, image } = params;
   const formData = new FormData();
-  formData.append('snapshot', image);
-  formData.append('coords', JSON.stringify(coords));
+  formData.append("snapshot", image);
+  formData.append("coords", JSON.stringify(coords));
 
-  const response = await fetch('/api/confirm-farm-area', {
-    method: 'POST',
+  // Use the BE base URL to construct the API endpoint.
+  const response = await fetch(`${BE_BASE_URL}/api/confirm-farm-area/${userId}`, {
+    method: "POST",
     headers: {
-      'Authorization': `Bearer ${token}`,
-      'X-User-Id': userId,
+      "Authorization": `Bearer ${token}`,
     },
     body: formData,
   });
   if (!response.ok) {
-    throw new Error('Failed to confirm farm area');
+    throw new Error("Failed to confirm farm area");
   }
   return await response.json();
 }
 
 export async function getDashboardData(userId: string, token: string): Promise<any> {
-  const response = await fetch('/api/dashboard', {
+  const response = await fetch(`${BE_BASE_URL}/api/dashboard/${userId}`, {
     headers: {
-      'Authorization': `Bearer ${token}`,
-      'X-User-Id': userId,
+      "Authorization": `Bearer ${token}`,
     },
   });
   if (!response.ok) {
-    throw new Error('Failed to fetch dashboard data');
+    throw new Error("Failed to fetch dashboard data");
   }
   return await response.json();
 }
