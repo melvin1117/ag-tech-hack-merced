@@ -1,21 +1,19 @@
 from fastapi import FastAPI
-from pymongo import MongoClient
-from celery_worker import dummy_task
+from fastapi.middleware.cors import CORSMiddleware
+from app.controllers import farm_controller
+from fastapi.staticfiles import StaticFiles
+
 
 app = FastAPI()
 
-# Connect to MongoDB (assuming the MongoDB container is named "mongo")
-client = MongoClient("mongodb://admin:secret@mongo:27017/?authSource=admin")
-db = client["dummy_db"]
+# Add CORS middleware (adjust allowed origins as needed)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # For production, restrict to your domain(s)
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
-@app.get("/")
-def read_root():
-    return {"message": "Hello from FastAPI with MongoDB"}
-
-@app.get("/dummy")
-def dummy_api(a: int = 1, b: int = 2):
-    # Insert a dummy record into MongoDB
-    db.dummy.insert_one({"a": a, "b": b})
-    # Trigger a dummy Celery task
-    result = dummy_task.delay(a, b)
-    return {"task_id": result.id}
+app.include_router(farm_controller.router, prefix="/api")
