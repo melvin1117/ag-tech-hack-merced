@@ -1,9 +1,9 @@
 FROM node:18.20.6
 WORKDIR /app
 
-# Copy package files and install dependencies
+# Copy package files and install dependencies with legacy peer deps
 COPY package*.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # Copy the rest of the code
 COPY . .
