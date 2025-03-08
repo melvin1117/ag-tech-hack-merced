@@ -4,7 +4,7 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import { DashboardNav } from "@/components/dashboard/dashboard-nav"
 import { PageHeader } from "@/components/page-header"
-import { FloatingChatButton } from "@/ag-tech-hack-merced/frontend/components/floating-chat-button"
+import { FloatingChatButton } from "@/components/floating-chat-button"
 
 const inter = Inter({ subsets: ["latin"] })
 
