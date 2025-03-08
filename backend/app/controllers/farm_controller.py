@@ -8,6 +8,7 @@ router = APIRouter()
 
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+import uuid
 
 @router.post("/confirm-farm-area/{user_id}")
 async def post_confirm_farm_area(
@@ -24,7 +25,7 @@ async def post_confirm_farm_area(
         raise HTTPException(status_code=400, detail="Invalid coordinates format") from e
 
     # Save the uploaded image file.
-    file_location = os.path.join(UPLOAD_DIR, snapshot.filename)
+    file_location = os.path.join(UPLOAD_DIR, f"{str(uuid.uuid4())}-{snapshot.filename}")
     with open(file_location, "wb") as f:
         content = await snapshot.read()
         f.write(content)
