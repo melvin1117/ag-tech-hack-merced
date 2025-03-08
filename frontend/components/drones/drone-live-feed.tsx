@@ -6,20 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {
-  Battery,
-  Signal,
-  Wifi,
-  MapPin,
-  Thermometer,
-  Wind,
-  Droplets,
-  Clock,
-  Video,
-  Camera,
-  Pause,
-  Play,
-} from "lucide-react"
+import { Battery, Signal, MapPin, Thermometer, Video, Camera, Pause, Play, Compass } from "lucide-react"
 
 export function DroneLiveFeed() {
   const [isPlaying, setIsPlaying] = useState(true)
@@ -68,126 +55,186 @@ export function DroneLiveFeed() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="md:col-span-2">
-          <CardContent className="p-0">
-            <div className="relative aspect-video w-full overflow-hidden rounded-md bg-black">
-              {/* Drone FPV GIF */}
-              <div
-                className={`absolute inset-0 transition-opacity duration-300 ${isPlaying ? "opacity-100" : "opacity-90"}`}
-              >
-                {/* 
-                  Replace this with an actual drone FPV GIF.
-                  For now, using a placeholder that simulates a GIF with CSS animation.
-                */}
+        <div className="md:col-span-2 space-y-4">
+          <Card>
+            <CardContent className="p-0">
+              <div className="relative aspect-video w-full overflow-hidden rounded-md bg-black">
+                {/* Drone FPV GIF - Without HUD overlays */}
                 <div
-                  className="absolute inset-0 bg-cover bg-center"
-                  style={{
-                    backgroundImage:
-                      "url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1280&h=720&q=80')",
-                    animation: isPlaying ? "slowPan 30s infinite alternate" : "none",
-                  }}
-                ></div>
+                  className={`absolute inset-0 transition-opacity duration-300 ${isPlaying ? "opacity-100" : "opacity-70"}`}
+                >
+                  <img
+                    src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExYjkycHVlMWlidzUzd2hrN2o5ZmQzdnVzOWt5eTVoMnhscHhtd3dsciZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/SULVcokl29SG5bM1L1/giphy.gif"
+                    alt="Drone aerial view of farmland"
+                    className="w-full h-full object-cover"
+                    style={{
+                      filter: isPlaying ? "none" : "grayscale(50%)",
+                    }}
+                  />
+                </div>
+
+                {/* Video controls */}
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 flex items-center justify-between">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-white hover:bg-white/20"
+                    onClick={() => setIsPlaying(!isPlaying)}
+                  >
+                    {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
+                      <Camera className="h-5 w-5" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
+                      <Video className="h-5 w-5" />
+                    </Button>
+                  </div>
+                </div>
               </div>
+            </CardContent>
+          </Card>
 
-              {/* HUD Elements */}
-              <div className="absolute inset-0 pointer-events-none">
-                {/* Top left - drone info */}
-                <div className="absolute top-3 left-3 bg-black/50 backdrop-blur-sm text-white text-xs p-2 rounded-md">
-                  <div className="flex items-center gap-1 mb-1">
-                    <Signal className="h-3 w-3" />
-                    <span>Signal: Strong</span>
+          {/* Drone Telemetry Data - Now below the GIF */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {/* Connection Status */}
+            <Card>
+              <CardContent className="p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-medium">Connection</h3>
+                  <Signal className="h-4 w-4 text-green-500" />
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Signal</span>
+                    <span>Strong</span>
                   </div>
-                  <div className="flex items-center gap-1 mb-1">
-                    <Battery className="h-3 w-3" />
-                    <span>Battery: {batteryLevel}%</span>
-                    <div className="w-12 h-1.5 bg-gray-700 rounded-full ml-1">
-                      <div
-                        className={`h-full rounded-full ${
-                          batteryLevel > 50 ? "bg-green-500" : batteryLevel > 20 ? "bg-yellow-500" : "bg-red-500"
-                        }`}
-                        style={{ width: `${batteryLevel}%` }}
-                      ></div>
-                    </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Data Link</span>
+                    <span>4G</span>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Wifi className="h-3 w-3" />
-                    <span>4G: Connected</span>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Latency</span>
+                    <span>120ms</span>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
 
-                {/* Top right - location and time */}
-                <div className="absolute top-3 right-3 bg-black/50 backdrop-blur-sm text-white text-xs p-2 rounded-md">
-                  <div className="flex items-center gap-1 mb-1">
-                    <MapPin className="h-3 w-3" />
-                    <span>42.3601° N, 71.0589° W</span>
+            {/* Battery Status */}
+            <Card>
+              <CardContent className="p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-medium">Battery</h3>
+                  <Battery className="h-4 w-4 text-green-500" />
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Level</span>
+                    <span>{batteryLevel}%</span>
                   </div>
-                  <div className="flex items-center gap-1 mb-1">
-                    <Clock className="h-3 w-3" />
-                    <span>{currentTime.toLocaleTimeString()}</span>
+                  <div className="w-full h-2 bg-secondary rounded-full">
+                    <div
+                      className={`h-full rounded-full ${
+                        batteryLevel > 50 ? "bg-green-500" : batteryLevel > 20 ? "bg-yellow-500" : "bg-red-500"
+                      }`}
+                      style={{ width: `${batteryLevel}%` }}
+                    ></div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Remaining</span>
+                    <span>~18 min</span>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
 
-                {/* Bottom left - flight data */}
-                <div className="absolute bottom-3 left-3 bg-black/50 backdrop-blur-sm text-white text-xs p-2 rounded-md">
-                  <div className="flex items-center gap-1 mb-1">
-                    <span>ALT: {altitude.toFixed(0)} ft</span>
+            {/* Flight Data */}
+            <Card>
+              <CardContent className="p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-medium">Flight Data</h3>
+                  <Compass className="h-4 w-4 text-blue-500" />
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Altitude</span>
+                    <span>{altitude.toFixed(0)} ft</span>
                   </div>
-                  <div className="flex items-center gap-1 mb-1">
-                    <span>SPD: {speed.toFixed(1)} mph</span>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Speed</span>
+                    <span>{speed.toFixed(1)} mph</span>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <span>DST: 0.8 mi</span>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Distance</span>
+                    <span>0.8 mi</span>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
 
-                {/* Bottom right - environmental data */}
-                <div className="absolute bottom-3 right-3 bg-black/50 backdrop-blur-sm text-white text-xs p-2 rounded-md">
-                  <div className="flex items-center gap-1 mb-1">
-                    <Thermometer className="h-3 w-3" />
+            {/* Environmental Data */}
+            <Card>
+              <CardContent className="p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-medium">Environment</h3>
+                  <Thermometer className="h-4 w-4 text-amber-500" />
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Temperature</span>
                     <span>72°F</span>
                   </div>
-                  <div className="flex items-center gap-1 mb-1">
-                    <Wind className="h-3 w-3" />
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Wind</span>
                     <span>8 mph NW</span>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Droplets className="h-3 w-3" />
-                    <span>Humidity: 65%</span>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Humidity</span>
+                    <span>65%</span>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+          </div>
 
-                {/* Center - crosshair */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="relative w-20 h-20">
-                    <div className="absolute top-1/2 left-0 w-full h-px bg-white/30"></div>
-                    <div className="absolute top-0 left-1/2 w-px h-full bg-white/30"></div>
-                    <div className="absolute top-1/2 left-1/2 w-4 h-4 border border-white/50 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Video controls */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 flex items-center justify-between">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-white hover:bg-white/20"
-                  onClick={() => setIsPlaying(!isPlaying)}
-                >
-                  {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
-                </Button>
+          {/* Location Information */}
+          <Card>
+            <CardContent className="p-3">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-medium">Location</h3>
                 <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
-                    <Camera className="h-5 w-5" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
-                    <Video className="h-5 w-5" />
-                  </Button>
+                  <MapPin className="h-4 w-4 text-red-500" />
+                  <span className="text-xs text-muted-foreground">{currentTime.toLocaleTimeString()}</span>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Coordinates</span>
+                  <p>42.3601° N, 71.0589° W</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Field</span>
+                  <p>North Field - Corn Section</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Mission</span>
+                  <p>Crop Health Monitoring</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Progress</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-full h-2 bg-secondary rounded-full">
+                      <div className="h-full rounded-full bg-blue-500" style={{ width: "68%" }}></div>
+                    </div>
+                    <span>68%</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
         <Card>
           <CardHeader>
