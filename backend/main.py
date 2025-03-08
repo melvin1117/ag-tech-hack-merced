@@ -5,7 +5,7 @@ from celery_worker import dummy_task
 app = FastAPI()
 
 # Connect to MongoDB (assuming the MongoDB container is named "mongo")
-client = MongoClient("mongodb://mongo:27017/")
+client = MongoClient("mongodb://admin:secret@mongo:27017/?authSource=admin")
 db = client["dummy_db"]
 
 @app.get("/")
