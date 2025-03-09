@@ -1,30 +1,30 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
-import 'ol/ol.css';
-import 'ol-geocoder/dist/ol-geocoder.min.css';
-import Map from 'ol/Map';
-import View from 'ol/View';
-import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer';
-import { XYZ } from 'ol/source';
-import { Vector as VectorSource } from 'ol/source';
-import { Draw } from 'ol/interaction';
-import { fromLonLat, toLonLat } from 'ol/proj';
-import OlGeocoder from 'ol-geocoder';
-import { Style, Stroke, Fill } from 'ol/style';
-import { useAuth0 } from '@auth0/auth0-react';
-import { confirmFarmArea, startAiTask, trackAiTask } from '../../services/api';
+import React, { useEffect, useRef, useState } from "react";
+import "ol/ol.css";
+import "ol-geocoder/dist/ol-geocoder.min.css";
+import Map from "ol/Map";
+import View from "ol/View";
+import { Tile as TileLayer, Vector as VectorLayer } from "ol/layer";
+import { XYZ } from "ol/source";
+import { Vector as VectorSource } from "ol/source";
+import { Draw } from "ol/interaction";
+import { fromLonLat, toLonLat } from "ol/proj";
+import OlGeocoder from "ol-geocoder";
+import { Style, Stroke, Fill } from "ol/style";
+import { useAuth0 } from "@auth0/auth0-react";
+import { confirmFarmArea, startAiTask, trackAiTask } from "../../services/api";
 
 interface MapSetupProps {
   onAiTaskComplete: () => void;
 }
 
 const cropOptions = [
-  'Almonds',
-  'Grapes',
-  'Tomatoes',
-  'Cotton',
-  'Wheat'
+  "Almonds",
+  "Grapes",
+  "Tomatoes",
+  "Cotton",
+  "Wheat"
 ];
 
 const MapSetup: React.FC<MapSetupProps> = ({ onAiTaskComplete }) => {
@@ -32,8 +32,8 @@ const MapSetup: React.FC<MapSetupProps> = ({ onAiTaskComplete }) => {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapObject = useRef<Map | null>(null);
   const [currentFeature, setCurrentFeature] = useState<any>(null);
-  const [selectedCrop, setSelectedCrop] = useState<string>('');
-  const [aiTaskMessage, setAiTaskMessage] = useState<string>('');
+  const [selectedCrop, setSelectedCrop] = useState<string>("");
+  const [aiTaskMessage, setAiTaskMessage] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
   // Create vector source and layer with thick red border and transparent fill.
@@ -43,11 +43,11 @@ const MapSetup: React.FC<MapSetupProps> = ({ onAiTaskComplete }) => {
       source: vectorSource.current,
       style: new Style({
         stroke: new Stroke({
-          color: 'red',
+          color: "red",
           width: 4,
         }),
         fill: new Fill({
-          color: 'rgba(0,0,0,0)',
+          color: "rgba(0,0,0,0)",
         }),
       }),
     })
@@ -64,9 +64,9 @@ const MapSetup: React.FC<MapSetupProps> = ({ onAiTaskComplete }) => {
       layers: [
         new TileLayer({
           source: new XYZ({
-            url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-            crossOrigin: 'anonymous',
-            attributions: 'Tiles © Esri',
+            url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+            crossOrigin: "anonymous",
+            attributions: "Tiles © Esri",
           }),
         }),
         vectorLayer.current,
@@ -77,50 +77,47 @@ const MapSetup: React.FC<MapSetupProps> = ({ onAiTaskComplete }) => {
       }),
     });
 
-    // Center on user's current location.
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          const coords = fromLonLat([position.coords.longitude, position.coords.latitude]);
+          const coords = fromLonLat([
+            position.coords.longitude,
+            position.coords.latitude,
+          ]);
           mapObject.current?.getView().animate({ center: coords, zoom: 14 });
         },
-        (error) => console.error('Error obtaining geolocation', error)
+        (error) => console.error("Error obtaining geolocation", error)
       );
     }
 
-    // Initialize drawing interaction for polygons.
     drawInteraction.current = new Draw({
-      type: 'Polygon',
+      type: "Polygon",
     });
     mapObject.current.addInteraction(drawInteraction.current);
 
-    // On draw end, clear any existing feature and store the new one.
-    drawInteraction.current.on('drawend', (event) => {
+    drawInteraction.current.on("drawend", (event) => {
       vectorSource.current.clear();
       const feature = event.feature;
       vectorSource.current.addFeature(feature);
       setCurrentFeature(feature);
-
-      // Log drawn coordinates (converted to lon/lat).
       const geometry = feature.getGeometry();
       const coords = geometry.getCoordinates();
       const lonLatCoords = coords.map((ring: any) =>
         ring.map((coord: any) => toLonLat(coord))
       );
-      console.log('Drawn polygon coordinates (lon, lat):', lonLatCoords);
+      console.log("Drawn polygon coordinates (lon, lat):", lonLatCoords);
     });
 
-    // Add geocoder control.
-    const geocoder = new OlGeocoder('nominatim', {
-      provider: 'osm',
-      lang: 'en-US',
-      placeholder: 'Search for location...',
+    const geocoder = new OlGeocoder("nominatim", {
+      provider: "osm",
+      lang: "en-US",
+      placeholder: "Search for location...",
       limit: 5,
       autoComplete: true,
       keepOpen: false,
     });
     mapObject.current.addControl(geocoder);
-    geocoder.on('addresschosen', (evt: any) => {
+    geocoder.on("addresschosen", (evt: any) => {
       mapObject.current?.getView().animate({ center: evt.coordinate, zoom: 14 });
     });
 
@@ -140,68 +137,74 @@ const MapSetup: React.FC<MapSetupProps> = ({ onAiTaskComplete }) => {
   // Helper: trigger download of image blob.
   const downloadImage = (blob: Blob) => {
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = 'map-snapshot.png';
+    a.download = "map-snapshot.png";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
 
-  // Poll AI task API every 5 seconds (up to 5 times) until status is SUCCESS or FAILURE.
+  // Poll AI task API every 5 seconds (up to 5 attempts).
   const pollAiTask = async (taskId: string, token: string): Promise<any> => {
-    let finalStatus = '';
+    let finalStatus = "";
     let responseData;
     for (let attempt = 1; attempt <= 5; attempt++) {
       await new Promise((resolve) => setTimeout(resolve, 5000));
       responseData = await trackAiTask(taskId, token);
       finalStatus = responseData.status;
       setAiTaskMessage(`Attempt ${attempt}: Task status is ${finalStatus}`);
-      if (finalStatus.toUpperCase() === 'SUCCESS' || finalStatus.toUpperCase() === 'FAILURE') {
+      if (
+        finalStatus.toUpperCase() === "SUCCESS" ||
+        finalStatus.toUpperCase() === "FAILURE"
+      ) {
         break;
       }
     }
     return { status: finalStatus, data: responseData };
   };
 
-  // Confirm: capture snapshot, call confirm API, then start and track AI task.
+  // Confirm: capture snapshot, call confirm API, then start and poll AI task.
   const handleConfirm = async () => {
     if (!currentFeature || !mapObject.current) {
-      alert('Please draw an area first.');
+      alert("Please draw an area first.");
       return;
     }
     if (!selectedCrop) {
-      alert('Please select a crop.');
+      alert("Please select a crop.");
       return;
     }
     setIsProcessing(true);
-    setAiTaskMessage('Starting processing...');
+    setAiTaskMessage("Starting processing...");
     const geometry = currentFeature.getGeometry();
     const extent = geometry.getExtent();
     mapObject.current.getView().fit(extent, { padding: [20, 20, 20, 20], duration: 0 });
 
     setTimeout(() => {
-      mapObject.current!.once('rendercomplete', async () => {
-        const mapCanvas = document.createElement('canvas');
+      mapObject.current!.once("rendercomplete", async () => {
+        const mapCanvas = document.createElement("canvas");
         const size = mapObject.current!.getSize();
         mapCanvas.width = size[0];
         mapCanvas.height = size[1];
-        const mapContext = mapCanvas.getContext('2d');
+        const mapContext = mapCanvas.getContext("2d");
 
         Array.prototype.forEach.call(
-          document.querySelectorAll('.ol-layer canvas'),
+          document.querySelectorAll(".ol-layer canvas"),
           (canvas: HTMLCanvasElement) => {
             if (canvas.width > 0) {
               const opacity = canvas.parentNode?.style.opacity;
-              mapContext!.globalAlpha = opacity === '' ? 1 : Number(opacity);
+              mapContext!.globalAlpha = opacity === "" ? 1 : Number(opacity);
               const transform = canvas.style.transform;
               const matrix = transform.match(/^matrix\(([^\(]*)\)$/)?.[1]
-                .split(',')
+                .split(",")
                 .map(Number);
               if (matrix) {
                 // @ts-ignore
-                CanvasRenderingContext2D.prototype.setTransform.apply(mapContext, matrix);
+                CanvasRenderingContext2D.prototype.setTransform.apply(
+                  mapContext,
+                  matrix
+                );
               }
               mapContext!.drawImage(canvas, 0, 0);
             }
@@ -210,19 +213,17 @@ const MapSetup: React.FC<MapSetupProps> = ({ onAiTaskComplete }) => {
 
         mapCanvas.toBlob(async (blob) => {
           if (blob) {
-            // Download image locally.
             downloadImage(blob);
-            // Convert polygon coordinates to lon/lat.
             const coords = geometry.getCoordinates();
             const lonLatCoords = coords.map((ring: any) =>
               ring.map((coord: any) => toLonLat(coord))
             );
-            console.log('Confirming area with coords:', lonLatCoords);
+            console.log("Confirming area with coords:", lonLatCoords);
             try {
               const token = await getAccessTokenSilently();
-              const userId = user?.sub || '';
+              const userId = user?.sub || "";
               if (!userId) {
-                alert('User ID not found.');
+                alert("User ID not found.");
                 setIsProcessing(false);
                 return;
               }
@@ -243,21 +244,20 @@ const MapSetup: React.FC<MapSetupProps> = ({ onAiTaskComplete }) => {
               // Poll for AI task status.
               const pollResult = await pollAiTask(taskId, token);
               setAiTaskMessage(`Final task status: ${pollResult.status}`);
-              if (pollResult.status.toUpperCase() === 'SUCCESS') {
-                setAiTaskMessage('Task completed successfully!');
+              if (pollResult.status.toUpperCase() === "SUCCESS") {
+                setAiTaskMessage("Task completed successfully!");
               } else {
-                setAiTaskMessage('Task failed or timed out.');
+                setAiTaskMessage("Task failed or timed out.");
               }
-              // Once complete, call the parent's callback to refresh dashboard.
               onAiTaskComplete();
             } catch (error) {
-              console.error('Error during AI task processing:', error);
-              alert('Failed to process AI task.');
+              console.error("Error during AI task processing:", error);
+              alert("Failed to process AI task.");
             } finally {
               setIsProcessing(false);
             }
           } else {
-            console.error('Failed to generate snapshot; canvas may be tainted.');
+            console.error("Failed to generate snapshot; canvas may be tainted.");
             setIsProcessing(false);
           }
         });
@@ -271,13 +271,13 @@ const MapSetup: React.FC<MapSetupProps> = ({ onAiTaskComplete }) => {
       {/* Map container */}
       <div ref={mapRef} className="w-full h-[70vh] relative" />
 
-      {/* Undo button: positioned at bottom left over the map */}
+      {/* Undo button: positioned at bottom left over the map container */}
       <button
         onClick={handleUndo}
-        className="absolute bottom-2 left-2 p-2 text-gray-600 hover:text-gray-800 bg-gray-100 bg-opacity-80 rounded-full shadow"
+        className="absolute bottom-2 left-2 p-2 text-gray-600 hover:text-gray-800 bg-gray-300 dark:bg-gray-700 bg-opacity-80 rounded-full shadow"
         title="Undo"
       >
-        ↺
+        ↻
       </button>
 
       {/* Crop selection dropdown and submit button */}
