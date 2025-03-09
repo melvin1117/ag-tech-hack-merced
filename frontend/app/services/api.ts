@@ -28,7 +28,7 @@ export async function confirmFarmArea(params: ConfirmFarmAreaParams): Promise<an
 }
 
 export async function getDashboardData(userId: string, token: string): Promise<any> {
-  const response = await fetch(`${BE_BASE_URL}/api/dashboard/${userId}`, {
+  const response = await fetch(`${BE_BASE_URL}/api/latest-farm-area/${userId}`, {
     headers: {
       "Authorization": `Bearer ${token}`,
     },
