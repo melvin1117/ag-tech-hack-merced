@@ -15,11 +15,20 @@ import { Style, Stroke, Fill } from 'ol/style';
 import { useAuth0 } from '@auth0/auth0-react';
 import { confirmFarmArea } from '../../services/api';
 
+const cropOptions = [
+  'Almonds',
+  'Grapes',
+  'Tomatoes',
+  'Cotton',
+  'Wheat'
+];
+
 const MapSetup = () => {
   const { user, getAccessTokenSilently } = useAuth0();
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapObject = useRef<Map | null>(null);
   const [currentFeature, setCurrentFeature] = useState<any>(null);
+  const [selectedCrop, setSelectedCrop] = useState<string>('');
 
   // Create a vector source and layer with a thick red border and transparent fill.
   const vectorSource = useRef(new VectorSource());
@@ -142,6 +151,10 @@ const MapSetup = () => {
       alert('Please draw an area first.');
       return;
     }
+    if (!selectedCrop) {
+      alert('Please select a crop.');
+      return;
+    }
     // Fit view to the feature's extent with some padding.
     const geometry = currentFeature.getGeometry();
     const extent = geometry.getExtent();
@@ -192,12 +205,13 @@ const MapSetup = () => {
                 alert('User ID not found.');
                 return;
               }
-              // Call the API via the service layer.
+              // Call the API via the service layer, including the selected crop.
               const data = await confirmFarmArea({
                 userId,
                 token,
                 coords: lonLatCoords,
                 image: blob,
+                crop: selectedCrop,
               });
               alert('Farm area confirmed successfully!');
               console.log('API response:', data);
@@ -215,20 +229,42 @@ const MapSetup = () => {
   };
 
   return (
-    <div className="flex flex-col">
-      <div ref={mapRef} className="w-full h-[70vh]" />
-      <div className="flex justify-center space-x-4 mt-4">
-        <button
-          onClick={handleUndo}
-          className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded shadow"
+    <div className="flex flex-col relative">
+      {/* Map container */}
+      <div ref={mapRef} className="w-full h-[70vh] relative" />
+
+      {/* Undo button: placed as an overlay at bottom left of the map container */}
+      <button
+        onClick={handleUndo}
+        className="absolute bottom-4 left-4 p-2 text-gray-600 hover:text-gray-800 bg-white bg-opacity-80 rounded-full shadow"
+        title="Undo"
+      >
+        ↺
+      </button>
+
+      {/* Crop selection dropdown and submit button */}
+      <div className="flex flex-col items-center mt-4">
+        <label htmlFor="cropSelect" className="mb-2 font-semibold text-gray-800 dark:text-gray-200">
+          Select Crop:
+        </label>
+        <select
+          id="cropSelect"
+          value={selectedCrop}
+          onChange={(e) => setSelectedCrop(e.target.value)}
+          className="w-64 p-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-800 dark:text-white dark:border-gray-700"
         >
-          Undo
-        </button>
+          <option value="">-- Select a crop --</option>
+          {cropOptions.map((crop) => (
+            <option key={crop} value={crop}>
+              {crop}
+            </option>
+          ))}
+        </select>
         <button
           onClick={handleConfirm}
-          className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded shadow"
+          className="mt-4 px-6 py-2 bg-green-500 hover:bg-green-600 text-white rounded shadow"
         >
-          Confirm Area
+          Submit
         </button>
       </div>
     </div>

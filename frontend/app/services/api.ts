@@ -5,15 +5,16 @@ export interface ConfirmFarmAreaParams {
   token: string;
   coords: any;
   image: Blob;
+  crop: string;
 }
 
 export async function confirmFarmArea(params: ConfirmFarmAreaParams): Promise<any> {
-  const { userId, token, coords, image } = params;
+  const { userId, token, coords, image, crop } = params;
   const formData = new FormData();
   formData.append("snapshot", image);
   formData.append("coords", JSON.stringify(coords));
+  formData.append("crop", crop);
 
-  // Use the BE base URL to construct the API endpoint.
   const response = await fetch(`${BE_BASE_URL}/api/confirm-farm-area/${userId}`, {
     method: "POST",
     headers: {
@@ -28,7 +29,7 @@ export async function confirmFarmArea(params: ConfirmFarmAreaParams): Promise<an
 }
 
 export async function getDashboardData(userId: string, token: string): Promise<any> {
-  const response = await fetch(`${BE_BASE_URL}/api/dashboard/${userId}`, {
+  const response = await fetch(`${BE_BASE_URL}/api/latest-farm-area/${userId}`, {
     headers: {
       "Authorization": `Bearer ${token}`,
     },
