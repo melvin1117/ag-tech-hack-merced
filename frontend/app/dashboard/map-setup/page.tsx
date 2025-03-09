@@ -271,7 +271,7 @@ const MapSetup: React.FC<MapSetupProps> = ({ onAiTaskComplete }) => {
       {/* Map container */}
       <div ref={mapRef} className="w-full h-[70vh] relative" />
 
-      {/* Undo button: positioned at bottom left over the map container */}
+      {/* Undo button: positioned as an overlay at bottom left of the map container */}
       <button
         onClick={handleUndo}
         className="absolute bottom-2 left-2 p-2 text-gray-600 hover:text-gray-800 bg-gray-300 dark:bg-gray-700 bg-opacity-80 rounded-full shadow"

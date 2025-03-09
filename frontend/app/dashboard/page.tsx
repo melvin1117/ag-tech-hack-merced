@@ -8,7 +8,7 @@ import dynamic from "next/dynamic";
 import { useAuth0 } from "@auth0/auth0-react";
 import { getDashboardData } from "../services/api";
 
-// Sample tiles – adjust these if you already have similar components.
+// Import additional dashboard tiles.
 import SoilChart from "@/components/dashboard/soil-chart";
 import WeatherTile from "@/components/dashboard/weather-tile";
 import ImageCarousel from "@/components/dashboard/image-carousel";
@@ -27,7 +27,7 @@ export default function DashboardPage() {
       const userId = user?.sub || "";
       const data = await getDashboardData(userId, token);
       setDashboardData(data);
-      // Fetch weather data using first coordinate from farm.
+      // If dashboard data exists, fetch weather using first coordinate.
       if (
         data &&
         data.land &&
@@ -64,7 +64,7 @@ export default function DashboardPage() {
     );
   }
 
-  // If no dashboard data, render MapSetup (for new farm area setup)
+  // If no dashboard data, show MapSetup for farm area setup.
   if (!dashboardData) {
     const MapSetup = dynamic(() => import("./map-setup/page"), { ssr: false });
     return (
@@ -84,28 +84,19 @@ export default function DashboardPage() {
   return (
     <PageContainer>
       <div className="flex">
-        {/* Use your existing sidebar */}
         <div className="flex-1">
-          <DashboardHeader title="AgroVision Dashboard" />
+          <DashboardHeader title="Dashboard" />
           <SectionContainer>
-            {/* First row: Soil chart and Weather tile */}
+            {/* First row: Soil chart and Weather tile (both 350px tall) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <SoilChart soil={dashboardData.soil} />
               <WeatherTile weather={weatherData} />
             </div>
-            {/* Optional weather alert */}
-            {weatherData && weatherData.weather && weatherData.weather[0] && (
-              <div className="mt-4 p-4 bg-yellow-100 dark:bg-yellow-800 rounded">
-                <p className="text-gray-800 dark:text-gray-200">
-                  Weather Alert: {weatherData.weather[0].description}
-                </p>
-              </div>
-            )}
             {/* Second row: Image carousel */}
             <div className="mt-6">
               <ImageCarousel images={dashboardData.imageInsights} />
             </div>
-            {/* Third row: Carbon footprint and AI suggestions */}
+            {/* Third row: Carbon footprint gauge and AI suggestions */}
             <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
               <CarbonFootprint value={dashboardData.carbonFootprint} />
               <AISuggestions suggestions={dashboardData.suggestions} insights={dashboardData.insights} />
