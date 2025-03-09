@@ -2,7 +2,7 @@ from fastapi import APIRouter, File, UploadFile, Form, HTTPException, Depends
 import json
 import os
 from app.auth import verify_token
-from app.services.farm_service import confirm_farm_area
+from app.services.farm_service import confirm_farm_area, get_latest_farm_area
 
 router = APIRouter()
 
@@ -37,3 +37,13 @@ async def post_confirm_farm_area(
         raise HTTPException(status_code=500, detail="Failed to insert document") from e
     
     return {"message": "Farm area confirmed", "id": inserted_id}
+
+@router.get("/latest-farm-area/{user_id}")
+async def get_latest_farm_area_endpoint(
+    user_id: str,
+    token_data: dict = Depends(verify_token),
+):
+    document = await get_latest_farm_area(user_id)
+    if not document:
+        raise HTTPException(status_code=404, detail="No farm area found for this user")
+    return document
