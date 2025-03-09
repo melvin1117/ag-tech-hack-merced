@@ -9,7 +9,8 @@ class Coordinate(BaseModel):
 class Land(BaseModel):
     landId: str
     coordinates: List[Coordinate]
-    image: str  # URL or file path
+    image: str
+    crop: str
 
 class FarmAreaDocument(BaseModel):
     userId: str
