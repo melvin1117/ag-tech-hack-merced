@@ -145,7 +145,7 @@ const MapSetup = () => {
     URL.revokeObjectURL(url);
   };
 
-  // Confirm: zoom to drawn area, capture snapshot, download image, and send API via service.
+  // Confirm: zoom to drawn area, capture snapshot, download image, and call API via service.
   const handleConfirm = async () => {
     if (!currentFeature || !mapObject.current) {
       alert('Please draw an area first.');
@@ -232,26 +232,26 @@ const MapSetup = () => {
     <div className="flex flex-col relative">
       {/* Map container */}
       <div ref={mapRef} className="w-full h-[70vh] relative" />
-      
-      {/* Undo button: positioned at bottom left over the map */}
+
+      {/* Undo button: placed as an overlay at bottom left of the map container */}
       <button
         onClick={handleUndo}
         className="absolute bottom-4 left-4 p-2 text-gray-600 hover:text-gray-800 bg-white bg-opacity-80 rounded-full shadow"
         title="Undo"
       >
-        &#8630;
+        ↺
       </button>
 
       {/* Crop selection dropdown and submit button */}
       <div className="flex flex-col items-center mt-4">
-        <label htmlFor="cropSelect" className="mb-2 font-semibold">
+        <label htmlFor="cropSelect" className="mb-2 font-semibold text-gray-800 dark:text-gray-200">
           Select Crop:
         </label>
         <select
           id="cropSelect"
           value={selectedCrop}
           onChange={(e) => setSelectedCrop(e.target.value)}
-          className="w-64 p-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="w-64 p-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-800 dark:text-white dark:border-gray-700"
         >
           <option value="">-- Select a crop --</option>
           {cropOptions.map((crop) => (

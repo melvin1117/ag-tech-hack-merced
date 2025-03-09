@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from app.db import lands_collection
 
-async def confirm_farm_area(user_id: str, coords: list, image_path: str) -> str:
+async def confirm_farm_area(user_id: str, coords: list, image_path: str, crop: str) -> str:
     now = datetime.utcnow()
     # Generate a unique landId using UUID4.
     land_id = str(uuid.uuid4())
@@ -10,8 +10,9 @@ async def confirm_farm_area(user_id: str, coords: list, image_path: str) -> str:
         "userId": user_id,
         "land": {
             "landId": land_id,
-            "coordinates": coords,  # Expected as a list of dicts: [{"lat": 12.34, "lon": 56.78}, ...]
+            "coordinates": coords,  # List of dicts: [{"lat": 12.34, "lon": 56.78}, ...]
             "image": image_path,
+            "crop": crop  # New field added inside the land object
         },
         "soil": {},
         "imageInsights": [],
