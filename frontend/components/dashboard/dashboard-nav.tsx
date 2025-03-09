@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { BarChart3, Cog, Home, Leaf, Map, Plane } from "lucide-react"
+import { BarChart3, ChartArea, Cog, Flower2, Home, Leaf, Map, Plane, Wheat } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -27,6 +27,16 @@ export function DashboardNav() {
           <span>Dashboard</span>
         </Link>
         <Link
+          href="/recommendations"
+          className={cn(
+            "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
+            pathname === "/recommendations" ? "bg-accent" : "transparent",
+          )}
+        >
+          <Wheat className="h-4 w-4" />
+          <span>Crop Recommendations</span>
+        </Link>
+        <Link
           href="/drones"
           className={cn(
             "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
@@ -34,7 +44,7 @@ export function DashboardNav() {
           )}
         >
           <Plane className="h-4 w-4" />
-          <span>Drones</span>
+          <span>Drone</span>
         </Link>
         <Link
           href="/fields"
@@ -43,8 +53,8 @@ export function DashboardNav() {
             pathname === "/fields" ? "bg-accent" : "transparent",
           )}
         >
-          <Map className="h-4 w-4" />
-          <span>Fields</span>
+          <ChartArea className="h-4 w-4" />
+          <span>Reports</span>
         </Link>
         <Link
           href="/analytics"
@@ -53,8 +63,8 @@ export function DashboardNav() {
             pathname === "/analytics" ? "bg-accent" : "transparent",
           )}
         >
-          <BarChart3 className="h-4 w-4" />
-          <span>Analytics</span>
+          <Flower2 className="h-4 w-4" />
+          <span>Bee Guide</span>
         </Link>
         <Link
           href="/settings"

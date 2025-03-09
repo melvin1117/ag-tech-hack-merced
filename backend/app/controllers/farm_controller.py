@@ -2,7 +2,7 @@ from fastapi import APIRouter, File, UploadFile, Form, HTTPException, Depends
 import json
 import os
 from app.auth import verify_token
-from app.services.farm_service import confirm_farm_area
+from app.services.farm_service import confirm_farm_area, get_latest_farm_area
 
 router = APIRouter()
 
@@ -16,9 +16,9 @@ async def post_confirm_farm_area(
     token_data: dict = Depends(verify_token),
     coords: str = Form(...),
     snapshot: UploadFile = File(...),
+    crop: str = Form(...) 
 ):
-    # We assume the FE sends a valid token; just ensure it exists.
-    # Parse coordinates (JSON string expected).
+
     try:
         coords_list = json.loads(coords)  # e.g., [{"lat":12.34,"lon":56.78}, ...]
     except Exception as e:
@@ -29,11 +29,20 @@ async def post_confirm_farm_area(
     with open(file_location, "wb") as f:
         content = await snapshot.read()
         f.write(content)
-    
-    # Call the service layer to save the document.
+    # Call the service layer to insert the document, now including the crop.
     try:
-        inserted_id = await confirm_farm_area(user_id, coords_list, file_location)
+        inserted_id = await confirm_farm_area(user_id, coords_list, file_location, crop)
     except Exception as e:
         raise HTTPException(status_code=500, detail="Failed to insert document") from e
-    
+
     return {"message": "Farm area confirmed", "id": inserted_id}
+
+@router.get("/latest-farm-area/{user_id}")
+async def get_latest_farm_area_endpoint(
+    user_id: str,
+    token_data: dict = Depends(verify_token),
+):
+    document = await get_latest_farm_area(user_id)
+    if not document:
+        raise HTTPException(status_code=404, detail="No farm area found for this user")
+    return document

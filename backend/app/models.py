@@ -9,7 +9,13 @@ class Coordinate(BaseModel):
 class Land(BaseModel):
     landId: str
     coordinates: List[Coordinate]
-    image: str  # URL or file path
+    image: str
+    crop: str
+
+class RecommendedCrop(BaseModel):
+    label: str
+    value: str
+    when: str
 
 class FarmAreaDocument(BaseModel):
     userId: str
@@ -20,5 +26,6 @@ class FarmAreaDocument(BaseModel):
     carbonFootprint: Optional[str] = None
     suggestions: Optional[str] = None
     insights: Optional[str] = None
+    recommendedCrops: Optional[List[RecommendedCrop]]
     createdAt: datetime
     updatedAt: datetime

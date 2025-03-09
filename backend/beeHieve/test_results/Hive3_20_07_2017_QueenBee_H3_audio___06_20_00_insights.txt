@@ -1,0 +1,5 @@
+Primary Classification: This audio is classified as 'nobee' with high confidence (91.6%).
+Segment Analysis: 15.7% of audio segments contain bee sounds (31 out of 197 segments).
+Consistency: Found a consistent sequence of 52 consecutive segments classified as 'nobee'.
+Pattern Analysis: Detected 20 distinct sound patterns with 8 transitions between bee and non-bee sounds.
+Summary: This recording shows strong evidence of external sounds not related to bee activity.

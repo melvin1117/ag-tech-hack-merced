@@ -15,23 +15,18 @@ const Sidebar: React.FC = () => {
             </Link>
           </li>
           <li className="mb-2">
-            <Link href="/drones" className="block py-2 px-4 hover:bg-gray-700 rounded">
-              Drones
+            <Link href="/reports" className="block py-2 px-4 hover:bg-gray-700 rounded">
+              Reports
             </Link>
           </li>
           <li className="mb-2">
-            <Link href="/fields" className="block py-2 px-4 hover:bg-gray-700 rounded">
-              Fields
+            <Link href="/crop-recommendations" className="block py-2 px-4 hover:bg-gray-700 rounded">
+              Crop Recommendations
             </Link>
           </li>
           <li className="mb-2">
-            <Link href="/analytics" className="block py-2 px-4 hover:bg-gray-700 rounded">
-              Analytics
-            </Link>
-          </li>
-          <li className="mb-2">
-            <Link href="/settings" className="block py-2 px-4 hover:bg-gray-700 rounded">
-              Settings
+            <Link href="/bee-guide" className="block py-2 px-4 hover:bg-gray-700 rounded">
+              Bee Guide
             </Link>
           </li>
         </ul>
