@@ -1,0 +1,24 @@
+{
+  "hiveHealth": "Excellent",
+  "activityLevel": "High",
+  "insights": [
+    "The extremely high percentage of bee sounds (97.0%) indicates a thriving, healthy colony with minimal external disturbances.",
+    "The long continuous sequence of bee sounds (105 segments) suggests consistent colony activity without interruptions, a sign of a well-established, undisturbed hive.",
+    "The high confidence in sound classifications (88.9%) suggests regular, rhythmic buzzing patterns typical of a healthy colony engaged in normal activities."
+  ],
+  "recommendations": [
+    "Perform a visual inspection of the hive to confirm the audio analysis findings, checking for queen activity, brood patterns, and overall colony strength.",
+    "Given the excellent audio profile, continue current management practices and consider expanding the colony or adding honey supers if in active season.",
+    "Document the current hive conditions for baseline comparison in future monitoring, noting the strong acoustic indicators of colony health."
+  ],
+  "timestamp": "2025-03-08T13:51:04.544819",
+  "analysisData": {
+    "beePercentage": 96.95431472081218,
+    "avgBeeConfidence": 0.8885838801324055,
+    "totalDuration": 591.0,
+    "totalSegments": 197,
+    "maxSequenceLength": 105,
+    "maxSequenceLabel": "bee"
+  },
+  "note": "Generated using local fallback due to Gemini API unavailability"
+}
