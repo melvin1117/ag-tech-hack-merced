@@ -5,6 +5,10 @@ export default function SettingsLayout({
 }: {
   children: React.ReactNode
 }) {
-  return <>{children}</>
+  return (
+    <div className="flex min-h-screen flex-col">
+      <main className="flex-1">{children}</main>
+    </div>
+  )
 }
 
