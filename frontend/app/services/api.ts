@@ -28,6 +28,31 @@ export async function confirmFarmArea(params: ConfirmFarmAreaParams): Promise<an
   return await response.json();
 }
 
+export async function startAiTask(userId: string, landId: string, token: string): Promise<{ task_id: string }> {
+  const response = await fetch(`${BE_BASE_URL}/api/start-ai-task/?user_id=${userId}&land_id=${landId}`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) {
+    throw new Error("Failed to start AI task");
+  }
+  return await response.json();
+}
+
+export async function trackAiTask(taskId: string, token: string): Promise<any> {
+  const response = await fetch(`${BE_BASE_URL}/api/track-ai-task/${taskId}`, {
+    headers: {
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) {
+    throw new Error("Failed to track AI task");
+  }
+  return await response.json();
+}
+
 export async function getDashboardData(userId: string, token: string): Promise<any> {
   const response = await fetch(`${BE_BASE_URL}/api/latest-farm-area/${userId}`, {
     headers: {

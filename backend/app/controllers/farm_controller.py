@@ -16,7 +16,7 @@ async def post_confirm_farm_area(
     token_data: dict = Depends(verify_token),
     coords: str = Form(...),
     snapshot: UploadFile = File(...),
-    crop: str = Form(...)  # Read the crop value from the form
+    crop: str = Form(...) 
 ):
 
     try:

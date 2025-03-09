@@ -23,8 +23,8 @@ async def confirm_farm_area(user_id: str, coords: list, image_path: str, crop: s
         "createdAt": now,
         "updatedAt": now,
     }
-    result = await lands_collection.insert_one(document)
-    return str(result.inserted_id)
+    await lands_collection.insert_one(document)
+    return str(land_id)
 
 async def get_latest_farm_area(user_id: str):
     cursor = lands_collection.find({"userId": user_id}).sort("createdAt", -1)

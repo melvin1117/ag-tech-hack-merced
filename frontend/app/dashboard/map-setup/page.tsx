@@ -13,7 +13,11 @@ import { fromLonLat, toLonLat } from 'ol/proj';
 import OlGeocoder from 'ol-geocoder';
 import { Style, Stroke, Fill } from 'ol/style';
 import { useAuth0 } from '@auth0/auth0-react';
-import { confirmFarmArea } from '../../services/api';
+import { confirmFarmArea, startAiTask, trackAiTask } from '../../services/api';
+
+interface MapSetupProps {
+  onAiTaskComplete: () => void;
+}
 
 const cropOptions = [
   'Almonds',
@@ -23,14 +27,16 @@ const cropOptions = [
   'Wheat'
 ];
 
-const MapSetup = () => {
+const MapSetup: React.FC<MapSetupProps> = ({ onAiTaskComplete }) => {
   const { user, getAccessTokenSilently } = useAuth0();
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapObject = useRef<Map | null>(null);
   const [currentFeature, setCurrentFeature] = useState<any>(null);
   const [selectedCrop, setSelectedCrop] = useState<string>('');
+  const [aiTaskMessage, setAiTaskMessage] = useState<string>('');
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
-  // Create a vector source and layer with a thick red border and transparent fill.
+  // Create vector source and layer with thick red border and transparent fill.
   const vectorSource = useRef(new VectorSource());
   const vectorLayer = useRef(
     new VectorLayer({
@@ -47,7 +53,7 @@ const MapSetup = () => {
     })
   );
 
-  // Reference for the Draw interaction.
+  // Reference for Draw interaction.
   const drawInteraction = useRef<Draw | null>(null);
 
   useEffect(() => {
@@ -71,7 +77,7 @@ const MapSetup = () => {
       }),
     });
 
-    // Center on user's current location if available.
+    // Center on user's current location.
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -88,14 +94,14 @@ const MapSetup = () => {
     });
     mapObject.current.addInteraction(drawInteraction.current);
 
-    // When drawing ends, clear any existing feature and save the new one.
+    // On draw end, clear any existing feature and store the new one.
     drawInteraction.current.on('drawend', (event) => {
       vectorSource.current.clear();
       const feature = event.feature;
       vectorSource.current.addFeature(feature);
       setCurrentFeature(feature);
 
-      // Log drawn coordinates (converted to lon/lat)
+      // Log drawn coordinates (converted to lon/lat).
       const geometry = feature.getGeometry();
       const coords = geometry.getCoordinates();
       const lonLatCoords = coords.map((ring: any) =>
@@ -110,12 +116,10 @@ const MapSetup = () => {
       lang: 'en-US',
       placeholder: 'Search for location...',
       limit: 5,
-      debug: false,
       autoComplete: true,
       keepOpen: false,
     });
     mapObject.current.addControl(geocoder);
-
     geocoder.on('addresschosen', (evt: any) => {
       mapObject.current?.getView().animate({ center: evt.coordinate, zoom: 14 });
     });
@@ -126,14 +130,14 @@ const MapSetup = () => {
     };
   }, []);
 
-  // Undo: remove the last drawn point using removeLastPoint().
+  // Undo: remove the last drawn point.
   const handleUndo = () => {
     if (drawInteraction.current) {
       drawInteraction.current.removeLastPoint();
     }
   };
 
-  // Download helper: trigger download of image blob.
+  // Helper: trigger download of image blob.
   const downloadImage = (blob: Blob) => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -145,7 +149,23 @@ const MapSetup = () => {
     URL.revokeObjectURL(url);
   };
 
-  // Confirm: zoom to drawn area, capture snapshot, download image, and call API via service.
+  // Poll AI task API every 5 seconds (up to 5 times) until status is SUCCESS or FAILURE.
+  const pollAiTask = async (taskId: string, token: string): Promise<any> => {
+    let finalStatus = '';
+    let responseData;
+    for (let attempt = 1; attempt <= 5; attempt++) {
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      responseData = await trackAiTask(taskId, token);
+      finalStatus = responseData.status;
+      setAiTaskMessage(`Attempt ${attempt}: Task status is ${finalStatus}`);
+      if (finalStatus.toUpperCase() === 'SUCCESS' || finalStatus.toUpperCase() === 'FAILURE') {
+        break;
+      }
+    }
+    return { status: finalStatus, data: responseData };
+  };
+
+  // Confirm: capture snapshot, call confirm API, then start and track AI task.
   const handleConfirm = async () => {
     if (!currentFeature || !mapObject.current) {
       alert('Please draw an area first.');
@@ -155,12 +175,12 @@ const MapSetup = () => {
       alert('Please select a crop.');
       return;
     }
-    // Fit view to the feature's extent with some padding.
+    setIsProcessing(true);
+    setAiTaskMessage('Starting processing...');
     const geometry = currentFeature.getGeometry();
     const extent = geometry.getExtent();
     mapObject.current.getView().fit(extent, { padding: [20, 20, 20, 20], duration: 0 });
-    
-    // Wait a tick for the view to update.
+
     setTimeout(() => {
       mapObject.current!.once('rendercomplete', async () => {
         const mapCanvas = document.createElement('canvas');
@@ -190,9 +210,9 @@ const MapSetup = () => {
 
         mapCanvas.toBlob(async (blob) => {
           if (blob) {
-            // Download the image locally.
+            // Download image locally.
             downloadImage(blob);
-            // Convert drawn polygon coordinates to lon/lat.
+            // Convert polygon coordinates to lon/lat.
             const coords = geometry.getCoordinates();
             const lonLatCoords = coords.map((ring: any) =>
               ring.map((coord: any) => toLonLat(coord))
@@ -203,24 +223,42 @@ const MapSetup = () => {
               const userId = user?.sub || '';
               if (!userId) {
                 alert('User ID not found.');
+                setIsProcessing(false);
                 return;
               }
-              // Call the API via the service layer, including the selected crop.
-              const data = await confirmFarmArea({
+              // Call confirm API.
+              const confirmResponse = await confirmFarmArea({
                 userId,
                 token,
                 coords: lonLatCoords,
                 image: blob,
                 crop: selectedCrop,
               });
-              alert('Farm area confirmed successfully!');
-              console.log('API response:', data);
+              const landId = confirmResponse.id;
+              setAiTaskMessage(`Farm area confirmed. Land ID: ${landId}. Starting AI task...`);
+              // Start AI task.
+              const startResponse = await startAiTask(userId, landId, token);
+              const taskId = startResponse.task_id;
+              setAiTaskMessage(`AI task started. Task ID: ${taskId}. Polling status...`);
+              // Poll for AI task status.
+              const pollResult = await pollAiTask(taskId, token);
+              setAiTaskMessage(`Final task status: ${pollResult.status}`);
+              if (pollResult.status.toUpperCase() === 'SUCCESS') {
+                setAiTaskMessage('Task completed successfully!');
+              } else {
+                setAiTaskMessage('Task failed or timed out.');
+              }
+              // Once complete, call the parent's callback to refresh dashboard.
+              onAiTaskComplete();
             } catch (error) {
-              console.error('Error confirming farm area:', error);
-              alert('Failed to confirm farm area.');
+              console.error('Error during AI task processing:', error);
+              alert('Failed to process AI task.');
+            } finally {
+              setIsProcessing(false);
             }
           } else {
             console.error('Failed to generate snapshot; canvas may be tainted.');
+            setIsProcessing(false);
           }
         });
       });
@@ -233,10 +271,10 @@ const MapSetup = () => {
       {/* Map container */}
       <div ref={mapRef} className="w-full h-[70vh] relative" />
 
-      {/* Undo button: placed as an overlay at bottom left of the map container */}
+      {/* Undo button: positioned at bottom left over the map */}
       <button
         onClick={handleUndo}
-        className="absolute bottom-4 left-4 p-2 text-gray-600 hover:text-gray-800 bg-white bg-opacity-80 rounded-full shadow"
+        className="absolute bottom-2 left-2 p-2 text-gray-600 hover:text-gray-800 bg-gray-100 bg-opacity-80 rounded-full shadow"
         title="Undo"
       >
         ↺
@@ -267,6 +305,19 @@ const MapSetup = () => {
           Submit
         </button>
       </div>
+
+      {/* Progress indicator overlay */}
+      {isProcessing && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="p-4 rounded bg-gray-800 shadow-lg flex items-center space-x-3">
+            <svg className="animate-spin h-6 w-6 text-white" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+            </svg>
+            <span className="text-white">{aiTaskMessage}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
