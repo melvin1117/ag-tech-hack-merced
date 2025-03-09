@@ -38,19 +38,44 @@ Displays **sensor and drone data** in an easy-to-understand UI.
 | **Cloud & Containers** | Docker, Docker Compose |
 | **Task Processing** | Celery |
 
-
----
-
 ## Installation & Setup
 
 ###  Prerequisites
 - Install **Docker** and **Docker Compose**.
-- Ensure **Python 3.9+** and **Node.js 18+** are installed.
+- Ensure **Git** is installed. (`git --version` to check)
 
 ### **1️⃣ Clone the Repository**
 ```bash
 git clone https://github.com/melvin1117/ag-tech-hack-merced.git
 
 cd ag-tech-hack-merced
+```
 
+### **2️⃣ Run the Project**
+```bash
+docker compose up --build
+```
 
+## Contributing
+
+- Fork the repository.
+- Create a new branch.
+```bash
+git checkout -b feature-branch
+```
+
+- Make your changes and commit.
+```bash
+git commit -m "Added new feature"
+```
+
+- Push to the branch
+```bash
+git push origin feature-branch
+```
+
+- Open a pull request.
+
+## Authors
+
+Developed by Shubham Melvin Felix, Shreyas Kumar, Aatisha Cyrill and Priyansh Shrivastava.
